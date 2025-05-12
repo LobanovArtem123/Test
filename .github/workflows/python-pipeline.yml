@@ -1,0 +1,51 @@
+name: Python CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create build folder and copy script
+        run: |
+          mkdir build
+          cp app.py build/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-code
+          path: build/app.py
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: python-code
+
+      - name: Run test on script
+        run: |
+          python app.py | grep "Hello from CI/CD!"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Download code for deployment
+        uses: actions/download-artifact@v3
+        with:
+          name: python-code
+
+      - name: Fake deploy step
+        run: |
+          echo "Pretending to deploy..."
+          cat app.py
